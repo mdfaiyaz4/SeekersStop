@@ -204,3 +204,260 @@ Spring Security and JWT handle authentication, authorization, and access control
 | `GET` | `/applications/{applicationId}` | `JOB_SEEKER` |
 | `GET` | `/applications/recruiter` | `RECRUITER` |
 | `PATCH` | `/applications/{applicationId}/status` | `RECRUITER` |
+
+## Validation & Error Handling
+
+The application uses **Jakarta Bean Validation** to validate incoming request data.
+
+Common validation annotations include:
+
+- `@NotBlank`
+- `@NotNull`
+- `@Positive`
+- `@Pattern`
+- `@Valid`
+
+A centralized exception handling mechanism is used to provide consistent API error responses.
+
+The application handles common HTTP responses such as:
+
+| Status | Meaning |
+|---|---|
+| `200 OK` | Request completed successfully |
+| `201 CREATED` | Resource successfully created |
+| `204 NO CONTENT` | Operation successful with no response body |
+| `400 BAD REQUEST` | Invalid request or validation failure |
+| `401 UNAUTHORIZED` | Authentication is missing or invalid |
+| `403 FORBIDDEN` | User is authenticated but lacks permission |
+| `404 NOT FOUND` | Requested resource does not exist |
+| `409 CONFLICT` | Resource conflicts or duplicate data |
+
+## Authentication Flow
+
+The application uses **JWT for stateless authentication**.
+
+```text
+User
+ |
+ | Login
+ v
+AuthController
+ |
+ v
+AuthService
+ |
+ | Validate credentials
+ v
+JwtService
+ |
+ | Generate JWT
+ v
+Client
+ |
+ | Authorization: Bearer <token>
+ v
+JwtFilter
+ |
+ | Validate token
+ v
+SecurityContext
+ |
+ v
+Protected Controller
+```
+
+After successful authentication, the user's role is stored as a Spring Security authority:
+
+```text
+ROLE_JOB_SEEKER
+```
+
+or:
+
+```text
+ROLE_RECRUITER
+```
+
+Spring Security then uses these authorities to determine whether the user can access a particular endpoint.
+
+## Database
+
+SeekersStop uses **MySQL** with **Spring Data JPA** and **Hibernate**.
+
+The main database used during development is:
+
+```text
+job_portal
+```
+
+The application uses JPA entities to represent the main domain objects, including:
+
+- `User`
+- `JobSeeker`
+- `Recruiter`
+- `Company`
+- `Job`
+- `Application`
+
+Hibernate manages the persistence and relationships between these entities.
+
+## Environment Configuration
+
+Sensitive configuration values are not stored directly in the repository.
+
+The application uses environment variables for:
+
+```text
+DB_USERNAME
+DB_PASSWORD
+JWT_SECRET
+```
+
+Example:
+
+```text
+DB_USERNAME=your_mysql_username
+DB_PASSWORD=your_mysql_password
+JWT_SECRET=your_secret_key
+```
+
+These values should be configured through the local environment or IDE run configuration.
+
+> **Important:** Never commit database credentials, JWT secrets, API keys, or other sensitive information to GitHub.
+
+The `.env` file is excluded through `.gitignore`.
+
+## Getting Started
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+- Java 21
+- MySQL
+- Git
+
+Maven is not required separately because the project includes the **Maven Wrapper**.
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/SeekersStop.git
+cd SeekersStop
+```
+
+### 2. Create the Database
+
+Create the MySQL database:
+
+```sql
+CREATE DATABASE job_portal;
+```
+
+### 3. Configure Environment Variables
+
+Set the following variables in your IDE or local environment:
+
+```text
+DB_USERNAME=your_mysql_username
+DB_PASSWORD=your_mysql_password
+JWT_SECRET=your_secret_key
+```
+
+### 4. Run the Application
+
+On Windows:
+
+```bash
+mvnw.cmd spring-boot:run
+```
+
+On Linux/macOS:
+
+```bash
+./mvnw spring-boot:run
+```
+
+The application will start on:
+
+```text
+http://localhost:8080
+```
+
+## Testing the API
+
+The REST APIs can be tested using **Postman**.
+
+A typical authentication flow is:
+
+```text
+Register
+   ↓
+Login
+   ↓
+Copy JWT
+   ↓
+Send JWT with protected requests
+```
+
+For protected endpoints, include the token in the request header:
+
+```text
+Authorization: Bearer <JWT_TOKEN>
+```
+
+Example:
+
+```http
+GET /applications/recruiter
+
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+```
+
+## Development Progress
+
+The project is being developed incrementally, with each feature being implemented and tested before being added to version control.
+
+Current backend functionality includes:
+
+- User authentication
+- JWT security
+- Role-based authorization
+- Job seeker profiles
+- Recruiter profiles
+- Company management
+- Job creation and management
+- Job activation and deactivation
+- Job applications
+- Application status management
+- Request validation
+- Global exception handling
+- MySQL persistence
+
+## Future Improvements
+
+Planned improvements include:
+
+- Pagination
+- Job search and filtering
+- Sorting
+- Resume file upload
+- Email notifications
+- Recruiter dashboard
+- Job seeker dashboard
+- Swagger / OpenAPI documentation
+- Unit testing
+- Integration testing
+- Dockerization
+- CI/CD pipeline
+- Cloud deployment
+
+## Author
+
+**MD Faiyaz**
+
+B.Tech — Computer Science & Technology
+
+## License
+
+This project is currently developed as a personal learning and portfolio project.
