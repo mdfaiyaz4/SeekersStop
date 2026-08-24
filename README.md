@@ -124,6 +124,7 @@ Repository Layer
   |
   v
 MySQL Database
+```
 
 ### Controller Layer
 
