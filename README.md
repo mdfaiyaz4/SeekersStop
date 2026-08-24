@@ -1,298 +1,126 @@
-\# SeekersStop
+# SeekersStop
 
+A role-based job portal backend built with Java and Spring Boot. SeekersStop connects job seekers and recruiters through a secure REST API, providing functionality for user authentication, job management, recruiter and job seeker profiles, company management, and job applications.
 
+## Overview
 
-A role-based job portal backend built with \*\*Java, Spring Boot, Spring Security, JWT, Spring Data JPA, Hibernate, and MySQL\*\*.
+SeekersStop is designed around two primary user roles:
 
+- **Job Seeker** — can create and manage a professional profile, browse jobs, apply for jobs, and track applications.
+- **Recruiter** — can manage a recruiter profile and company, create and manage job postings, view applications, and update application statuses.
 
+The application follows a layered architecture using Controllers, Services, Repositories, DTOs, and Entities.
 
-SeekersStop provides separate functionality for \*\*Job Seekers\*\* and \*\*Recruiters\*\*, allowing job seekers to manage their profiles and applications while recruiters can manage companies, create and manage job postings, and process applications.
+## Features
 
+### Authentication & Security
 
+- User registration and login
+- JWT-based authentication
+- BCrypt password hashing
+- Role-based authorization
+- Separate permissions for `JOB_SEEKER` and `RECRUITER`
+- JWT request filtering using `OncePerRequestFilter`
+- Protected REST endpoints
+- Centralized handling of authentication and authorization errors
 
-\---
-
-
-
-\## 🚀 Features
-
-
-
-\### 🔐 Authentication \& Authorization
-
-
-
-\- User registration
-
-\- User login
-
-\- JWT-based authentication
-
-\- Secure password hashing using BCrypt
-
-\- Role-based authorization
-
-\- Separate access control for:
-
-&#x20; - `JOB\_SEEKER`
-
-&#x20; - `RECRUITER`
-
-\- JWT authentication filter using `OncePerRequestFilter`
-
-\- Protected REST APIs
-
-\- Unauthorized and forbidden request handling
-
-
-
-\---
-
-
-
-\### 👤 Job Seeker
-
-
+### Job Seeker
 
 Job seekers can:
 
+- Create a job seeker profile
+- View their own profile
+- Update their profile
+- Store skills, experience, CV, and contact information
+- Browse available jobs
+- View individual job details
+- Apply for jobs
+- View their applications
+- View individual application details
 
-
-\- Create their job seeker profile
-
-\- View their own profile
-
-\- Update their profile
-
-\- Store:
-
-&#x20; - Name
-
-&#x20; - Skills
-
-&#x20; - Experience
-
-&#x20; - CV
-
-&#x20; - Contact information
-
-\- Browse available jobs
-
-\- View individual job details
-
-\- Apply for jobs
-
-\- View their applications
-
-\- View individual application details
-
-
-
-\---
-
-
-
-\### 🏢 Recruiter
-
-
+### Recruiter
 
 Recruiters can:
 
+- Create a recruiter profile
+- View their own profile
+- Update their profile
+- Manage their associated company
+- Create job postings
+- Update job postings
+- Activate and deactivate job postings
+- View applications for their jobs
+- Update application statuses
 
+### Company Management
 
-\- Create their recruiter profile
+Recruiters can manage the company associated with their account.
 
-\- View their own recruiter profile
+Company operations include:
 
-\- Update their recruiter profile
+- Create company
+- View company information
+- Update company information
 
-\- Manage their associated company
+Company access is tied to the authenticated recruiter, preventing arbitrary access to another company's information.
 
-\- Create job postings
-
-\- Update job postings
-
-\- View job postings
-
-\- View individual job details
-
-\- Deactivate job postings
-
-\- Reactivate job postings
-
-\- View applications received for their jobs
-
-\- Change application status
-
-
-
-\---
-
-
-
-\### 🏭 Company Management
-
-
-
-Recruiters can manage their associated company profile.
-
-
-
-Company information includes:
-
-
-
-\- Company name
-
-\- Description
-
-\- Location
-
-\- Website
-
-\- Contact information
-
-
-
-Available operations:
-
-
-
-\- Get company profile
-
-\- Update company profile
-
-
-
-The company is accessed through the authenticated recruiter's account rather than allowing users to arbitrarily access another company's information.
-
-
-
-\---
-
-
-
-\### 💼 Job Management
-
-
+### Job Management
 
 Recruiters can create and manage job postings.
 
+Each job contains:
 
+- Job title
+- Description
+- Required experience
+- Qualification
+- Salary
+- Location
+- Application deadline
 
-A job contains:
+Jobs can also be activated or deactivated without permanently deleting the job record.
 
+### Application Management
 
+The application system connects job seekers with recruiters.
 
-\- Job title
+Job seekers can submit applications for available jobs, while recruiters can review applications associated with their job postings and update their status.
 
-\- Description
+Application status changes are handled through a dedicated API endpoint.
 
-\- Required experience
+## Technology Stack
 
-\- Qualification
+| Technology | Purpose |
+|---|---|
+| Java 21 | Programming language |
+| Spring Boot | Backend framework |
+| Spring MVC | REST API development |
+| Spring Security | Authentication and authorization |
+| JWT | Stateless authentication |
+| Spring Data JPA | Data access layer |
+| Hibernate | ORM |
+| MySQL | Relational database |
+| Jakarta Validation | Request validation |
+| Lombok | Boilerplate reduction |
+| Maven | Build and dependency management |
+| Postman | API testing |
+| Git & GitHub | Version control |
 
-\- Salary
+## Architecture
 
-\- Location
-
-\- Application deadline
-
-
-
-Job lifecycle:
-
-
+The project follows a layered architecture:
 
 ```text
-
-ACTIVE
-
-&#x20;  │
-
-&#x20;  │ Deactivate
-
-&#x20;  ▼
-
-INACTIVE
-
-&#x20;  │
-
-&#x20;  │ Activate
-
-&#x20;  ▼
-
-ACTIVE
-
-
-
-Recruiters can deactivate a job when it should no longer be available and reactivate it when required.
-
-
-
-📄 Job Applications
-
-
-
-Job seekers can apply for jobs.
-
-
-
-Recruiters can:
-
-
-
-View applications associated with their jobs
-
-View individual applications
-
-Update application status
-
-
-
-Application status management is handled through a dedicated endpoint.
-
-
-
-🛡️ Validation
-
-
-
-The project uses Jakarta Bean Validation to validate incoming request DTOs.
-
-
-
-Examples include:
-
-
-
-@NotBlank
-
-@NotNull
-
-@Positive
-
-@Pattern
-
-
-
-Example validation:
-
-
-
-@NotBlank(message = "Job title is required")
-
-private String title;
-
-
-
-@NotNull(message = "Job salary is required")
-
-@Positive(message = "Salary cannot be less than 0")
-
-private Double salary;
-
-
-
-Validation errors are handled centrally instead of writing the same error-handling logic inside every controller.
-
+Client
+  |
+  v
+Controller Layer
+  |
+  v
+Service Layer
+  |
+  v
+Repository Layer
+  |
+  v
+MySQL Database
