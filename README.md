@@ -124,3 +124,82 @@ Repository Layer
   |
   v
 MySQL Database
+
+### Controller Layer
+
+Responsible for:
+
+- Receiving HTTP requests
+- Mapping API endpoints
+- Validating request DTOs
+- Returning API responses
+
+### Service Layer
+
+Contains the application's business logic and coordinates operations between controllers and repositories.
+
+### Repository Layer
+
+Handles database persistence using Spring Data JPA.
+
+### DTO Layer
+
+DTOs are used to separate API request/response models from database entities.
+
+### Security Layer
+
+Spring Security and JWT handle authentication, authorization, and access control.
+
+## API Endpoints
+
+### Authentication
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `POST` | `/auth/register` | Public |
+| `POST` | `/auth/login` | Public |
+
+### Job Seeker
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `POST` | `/jobseeker/profile` | `JOB_SEEKER` |
+| `GET` | `/jobseeker/profile` | `JOB_SEEKER` |
+| `PUT` | `/jobseeker/profile` | `JOB_SEEKER` |
+
+### Recruiter
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `POST` | `/recruiter/profile` | `RECRUITER` |
+| `GET` | `/recruiter/profile` | `RECRUITER` |
+| `PUT` | `/recruiter/profile` | `RECRUITER` |
+
+### Company
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `POST` | `/company` | `RECRUITER` |
+| `GET` | `/company` | `RECRUITER` |
+| `PUT` | `/company` | `RECRUITER` |
+
+### Jobs
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `POST` | `/jobs` | `RECRUITER` |
+| `GET` | `/jobs` | Authenticated |
+| `GET` | `/jobs/{id}` | Authenticated |
+| `PUT` | `/jobs/{id}` | `RECRUITER` |
+| `DELETE` | `/jobs/deactive/{id}` | `RECRUITER` |
+| `PUT` | `/jobs/active/{id}` | `RECRUITER` |
+
+### Applications
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `POST` | `/applications` | `JOB_SEEKER` |
+| `GET` | `/applications/my` | `JOB_SEEKER` |
+| `GET` | `/applications/{applicationId}` | `JOB_SEEKER` |
+| `GET` | `/applications/recruiter` | `RECRUITER` |
+| `PATCH` | `/applications/{applicationId}/status` | `RECRUITER` |
