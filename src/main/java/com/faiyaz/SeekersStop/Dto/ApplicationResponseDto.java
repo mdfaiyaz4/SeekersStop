@@ -4,12 +4,13 @@ import com.faiyaz.SeekersStop.Entity.JobSeeker;
 import com.faiyaz.SeekersStop.Enums.ApplicationStatus;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
 public class ApplicationResponseDto {
     private Long applicationId;
-    private Date appliedAt;
+    private LocalDateTime appliedAt;
     private String jobSeeker;
     private ApplicationStatus applicationStatus;
     private String jobName;

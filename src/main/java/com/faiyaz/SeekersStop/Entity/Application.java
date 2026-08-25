@@ -5,6 +5,7 @@ import com.faiyaz.SeekersStop.Enums.ApplicationStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -13,7 +14,7 @@ public class Application {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Date appliedAt;
+    private LocalDateTime appliedAt;
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status;
 

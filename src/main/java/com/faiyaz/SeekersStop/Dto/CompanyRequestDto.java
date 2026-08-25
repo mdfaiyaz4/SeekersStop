@@ -20,7 +20,7 @@ public class CompanyRequestDto {
             regexp = "^[6-9]\\d{9}$",
             message = "Enter a valid 10-digit contact number"
     )
-    @NotNull(message = "Contact cannot be empty")
+    @NotBlank(message = "Contact cannot be empty")
     private String contact;
 
     @NotBlank(message = "Company website is required")

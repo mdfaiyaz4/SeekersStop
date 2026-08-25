@@ -17,6 +17,6 @@ public class RecruiterRequestDto {
     @NotBlank(message = "Contact cannot be empty")
     private String contact;
 
-    @NotNull(message = "Comapny Id is required")
+    @NotNull(message = "Company Id is required")
     private Long companyId;
 }

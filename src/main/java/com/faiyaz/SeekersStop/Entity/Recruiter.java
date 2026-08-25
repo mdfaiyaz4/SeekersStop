@@ -18,6 +18,6 @@ public class Recruiter {
     private Company company;
 
     @OneToOne
-    @JoinColumn(name = "user_id", unique = true)
+    @JoinColumn(name = "user_id", unique = true,nullable = false)
     private User user;
 }

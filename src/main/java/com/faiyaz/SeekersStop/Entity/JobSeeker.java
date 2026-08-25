@@ -17,6 +17,6 @@ public class JobSeeker {
     private String experience;
 
     @OneToOne
-    @JoinColumn(name = "user_id",unique = true)
+    @JoinColumn(name = "user_id",unique = true,nullable = false)
     private User user;
 }

@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,7 +51,7 @@ public class ApplicationService {
         Application application = new  Application();
         application.setJob(job);
         application.setJobSeeker(jobseeker);
-        application.setAppliedAt(new Date());
+        application.setAppliedAt(LocalDateTime.now());
         application.setStatus(ApplicationStatus.PENDING);
 
         if(!applicationRepository.existsByJobAndJobSeeker(job,jobseeker)) {

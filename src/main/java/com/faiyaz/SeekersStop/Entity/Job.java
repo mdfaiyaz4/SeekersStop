@@ -23,7 +23,8 @@ public class Job {
         private Double salary;
         private String location;
         private LocalDate deadline;
-        private Boolean active;
+        @Column(nullable = false)
+        private Boolean active = true;
 
         @ManyToOne
         @JoinColumn(name = "recruiter_id")
