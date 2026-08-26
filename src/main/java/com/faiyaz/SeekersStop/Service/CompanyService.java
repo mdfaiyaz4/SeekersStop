@@ -8,24 +8,24 @@ import com.faiyaz.SeekersStop.Entity.Recruiter;
 import com.faiyaz.SeekersStop.Entity.User;
 import com.faiyaz.SeekersStop.Repository.CompanyRepository;
 import com.faiyaz.SeekersStop.Repository.RecruiterRepository;
-import com.faiyaz.SeekersStop.Repository.UserRepository;
+import com.faiyaz.SeekersStop.UserDefinedExceptions.DuplicateResourceException;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ResourceNotFoundException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class CompanyService {
-    public CompanyService(CompanyRepository companyRepository,  UserRepository userRepository
-    , RecruiterRepository recruiterRepository) {
+    public CompanyService(CompanyRepository companyRepository
+    , RecruiterRepository recruiterRepository,FindByAuthenticationService  findByAuthenticationService
+                          ) {
         this.companyRepository = companyRepository;
-        this.userRepository = userRepository;
         this.recruiterRepository = recruiterRepository;
+        this.findByAuthenticationService = findByAuthenticationService;
     }
-    private CompanyRepository companyRepository;
-    private UserRepository userRepository;
-    private RecruiterRepository recruiterRepository;
+    private final FindByAuthenticationService  findByAuthenticationService;
+    private final CompanyRepository companyRepository;
+    private final RecruiterRepository recruiterRepository;
 
     public CompanyResponseDto createCompany(CompanyRequestDto companyRequestDto){
 
@@ -51,11 +51,12 @@ public class CompanyService {
 
     public CompanyResponseDto getMyCompany(){
 
-        Authentication  authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        User user = findByAuthenticationService.findUser();
         Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
         Company company = recruiter.getCompany();
+        if(company == null){
+            throw new ResourceNotFoundException("Company not found");
+        }
 
         CompanyResponseDto companyResponseDto = new CompanyResponseDto();
         companyResponseDto.setName(company.getName());
@@ -71,11 +72,12 @@ public class CompanyService {
     public CompanyResponseDto updateMyCompany(CompanyRequestDto companyRequestDto){
 
 
-        Authentication  authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        User user = findByAuthenticationService.findUser();
         Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
         Company company = recruiter.getCompany();
+        if(company == null){
+            throw new ResourceNotFoundException("Company not found");
+        }
 
         company.setName(companyRequestDto.getName());
         company.setDescription(companyRequestDto.getDescription());

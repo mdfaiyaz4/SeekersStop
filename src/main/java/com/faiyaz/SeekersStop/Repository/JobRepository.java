@@ -1,6 +1,5 @@
 package com.faiyaz.SeekersStop.Repository;
 
-import com.faiyaz.SeekersStop.Entity.Company;
 import com.faiyaz.SeekersStop.Entity.Job;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -5,35 +5,37 @@ import com.faiyaz.SeekersStop.Dto.JobSeekerResponseDto;
 import com.faiyaz.SeekersStop.Entity.JobSeeker;
 import com.faiyaz.SeekersStop.Entity.User;
 import com.faiyaz.SeekersStop.Repository.JobSeekerRepository;
-import com.faiyaz.SeekersStop.Repository.UserRepository;
+import com.faiyaz.SeekersStop.UserDefinedExceptions.DuplicateResourceException;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ResourceNotFoundException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class JobSeekerService {
     private final JobSeekerRepository jobSeekerRepository;
-    private final UserRepository userRepository;
-    public JobSeekerService(JobSeekerRepository jobSeekerRepository, UserRepository userRepository) {
+
+    private final FindByAuthenticationService findByAuthentication;
+
+    public JobSeekerService(JobSeekerRepository jobSeekerRepository,
+                            FindByAuthenticationService findByAuthentication) {
         this.jobSeekerRepository = jobSeekerRepository;
-        this.userRepository = userRepository;
+        this.findByAuthentication = findByAuthentication;
 
     }
     public JobSeekerResponseDto createJobSeekerProfile(JobSeekerRequestDto jobSeekerRequestDto){
+        User user = findByAuthentication.findUser();
+        if(jobSeekerRepository.existsByUser(user)){
+            throw new DuplicateResourceException("Jobseeker already exists");
+        }
+
        JobSeeker jobSeeker = new  JobSeeker();
+        jobSeeker.setUser(user);
        jobSeeker.setName(jobSeekerRequestDto.getName());
        jobSeeker.setCv(jobSeekerRequestDto.getCv());
        jobSeeker.setExperience(jobSeekerRequestDto.getExperience());
        jobSeeker.setContact(jobSeekerRequestDto.getContact());
        jobSeeker.setSkill(jobSeekerRequestDto.getSkill());
 
-       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        String username = authentication.getName();
-       User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Invalid Username"));
-       jobSeeker.setUser(user);
+
         JobSeeker saved = jobSeekerRepository.save(jobSeeker);
 
         JobSeekerResponseDto jobSeekerResponseDto = new JobSeekerResponseDto();
@@ -46,12 +48,9 @@ public class JobSeekerService {
         return jobSeekerResponseDto;
 
     }
-    public JobSeekerResponseDto GetMyJobSeekerProfile(){
+    public JobSeekerResponseDto getMyJobSeekerProfile(){
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Invalid Username"));
+        User  user = findByAuthentication.findUser();
         JobSeeker jobSeeker =  jobSeekerRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Invalid JobSeeker"));
 
         JobSeekerResponseDto jobSeekerResponseDto = new JobSeekerResponseDto();
@@ -64,11 +63,8 @@ public class JobSeekerService {
         return jobSeekerResponseDto;
     }
 
-    public JobSeekerResponseDto UpdateMyJobSeekerProfile(JobSeekerRequestDto jobSeekerRequestDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Invalid Username"));
+    public JobSeekerResponseDto updateMyJobSeekerProfile(JobSeekerRequestDto jobSeekerRequestDto) {
+        User user = findByAuthentication.findUser();
         JobSeeker jobSeeker =  jobSeekerRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Invalid JobSeeker"));
 
         jobSeeker.setContact(jobSeekerRequestDto.getContact());

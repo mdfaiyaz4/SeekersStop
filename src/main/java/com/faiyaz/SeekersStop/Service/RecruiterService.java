@@ -8,32 +8,31 @@ import com.faiyaz.SeekersStop.Entity.Recruiter;
 import com.faiyaz.SeekersStop.Entity.User;
 import com.faiyaz.SeekersStop.Repository.CompanyRepository;
 import com.faiyaz.SeekersStop.Repository.RecruiterRepository;
-import com.faiyaz.SeekersStop.Repository.UserRepository;
+import com.faiyaz.SeekersStop.UserDefinedExceptions.DuplicateResourceException;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ResourceNotFoundException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RecruiterService {
     private final RecruiterRepository recruiterRepository;
-    private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
+    private final FindByAuthenticationService findByAuthenticationService;
+
 
     public RecruiterService(RecruiterRepository recruiterRepository,
-                            UserRepository userRepository,
+                            FindByAuthenticationService findByAuthenticationService,
                             CompanyRepository companyRepository) {
         this.recruiterRepository = recruiterRepository;
-        this.userRepository = userRepository;
+        this.findByAuthenticationService = findByAuthenticationService;
         this.companyRepository = companyRepository;
     }
 
     public RecruiterResponseDto createRecruiterProfile(RecruiterRequestDto recruiterRequestDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+        User user = findByAuthenticationService.findUser();
+
+        if (recruiterRepository.existsByUser(user)){
+            throw new DuplicateResourceException("Recruiter profile already exists");
+        }
         Company company = companyRepository.findById(recruiterRequestDto.getCompanyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
         Recruiter recruiter = new Recruiter();
@@ -56,11 +55,7 @@ public class RecruiterService {
     }
 
     public RecruiterResponseDto GetMyRecruiterProfile() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+        User user = findByAuthenticationService.findUser();
         Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
 
         RecruiterResponseDto recruiterResponseDto = new RecruiterResponseDto();
@@ -74,16 +69,10 @@ public class RecruiterService {
     }
 
     public RecruiterResponseDto UpdateMyRecruiterProfile(RecruiterProfileUpdateRequestDto recruiterProfileUpdateRequestDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("username not found"));
+        User user = findByAuthenticationService.findUser();
 
         Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
         recruiter.setName(recruiterProfileUpdateRequestDto.getName());
-
-
 
         recruiter.setContactInfo(recruiterProfileUpdateRequestDto.getContact());
         Recruiter saved = recruiterRepository.save(recruiter);

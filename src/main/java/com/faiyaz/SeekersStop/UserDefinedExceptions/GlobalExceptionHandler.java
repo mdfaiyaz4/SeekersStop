@@ -50,5 +50,14 @@ public class GlobalExceptionHandler{
         ExceptionResponseDto exceptionResponseDto = new ExceptionResponseDto(HttpStatus.BAD_REQUEST.value(),msg);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseDto);
     }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ExceptionResponseDto> handleException(Exception e) {
+        ExceptionResponseDto exceptionResponseDto = new ExceptionResponseDto
+                (HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "Something went wrong. Please try again later.");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(exceptionResponseDto);
+
+    }
 
 }

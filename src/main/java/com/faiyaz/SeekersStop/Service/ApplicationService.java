@@ -1,49 +1,48 @@
 package com.faiyaz.SeekersStop.Service;
 
-import com.faiyaz.SeekersStop.Dto.*;
+import com.faiyaz.SeekersStop.Dto.ApplicationRequestDto;
+import com.faiyaz.SeekersStop.Dto.ApplicationResponseDto;
+import com.faiyaz.SeekersStop.Dto.ApplicationStatusRequestDto;
+import com.faiyaz.SeekersStop.Dto.ApplicationStatusResponseDto;
 import com.faiyaz.SeekersStop.Entity.*;
 import com.faiyaz.SeekersStop.Enums.ApplicationStatus;
-import com.faiyaz.SeekersStop.Repository.*;
+import com.faiyaz.SeekersStop.Repository.ApplicationRepository;
+import com.faiyaz.SeekersStop.Repository.JobRepository;
+import com.faiyaz.SeekersStop.Repository.JobSeekerRepository;
+import com.faiyaz.SeekersStop.Repository.RecruiterRepository;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.DuplicateResourceException;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ForbiddenException;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ResourceNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
 public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;
-    private final UserRepository userRepository;
     private final JobSeekerRepository jobSeekerRepository;
     private final JobRepository jobRepository;
     private final RecruiterRepository  recruiterRepository;
+    private final FindByAuthenticationService findByAuthenticationService;
 
-    public ApplicationService(ApplicationRepository applicationRepository, UserRepository userRepository
+
+    public ApplicationService(ApplicationRepository applicationRepository
     , JobSeekerRepository jobSeekerRepository, JobRepository jobRepository
-    , RecruiterRepository recruiterRepository) {
+    , RecruiterRepository recruiterRepository, FindByAuthenticationService findByAuthenticationService) {
         this.applicationRepository = applicationRepository;
+        this.findByAuthenticationService = findByAuthenticationService;
         this.jobRepository = jobRepository;
-        this.userRepository = userRepository;
         this.jobSeekerRepository = jobSeekerRepository;
         this.recruiterRepository = recruiterRepository;
     }
 
     public ApplicationResponseDto createJobApplication(ApplicationRequestDto applicationRequestDto){
 
-        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        User user = findByAuthenticationService.findUser();
         JobSeeker jobseeker = jobSeekerRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Job seeker not found"));
         Job job = jobRepository.findByIdAndActiveTrue(applicationRequestDto.getJobId()).orElseThrow(() -> new ResourceNotFoundException("Job not found or Job is not Active"));
         if(job.getDeadline().isBefore(LocalDate.now())) throw new ForbiddenException("Deadline has Passed");
@@ -70,10 +69,7 @@ public class ApplicationService {
         }
     }
     public ApplicationStatusResponseDto changeApplicationStatus(ApplicationStatusRequestDto applicationStatusRequestDto,long applicationId){
-        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        User user = findByAuthenticationService.findUser();
         Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
         Application application =  applicationRepository.findByIdAndJobRecruiterId(applicationId,recruiter.getId()).orElseThrow(() -> new ResourceNotFoundException("Application not found"));
         application.setStatus(applicationStatusRequestDto.getApplicationStatus());
@@ -84,10 +80,7 @@ public class ApplicationService {
     }
 
     public ApplicationResponseDto getApplicationById(Long applicationId){
-        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        User user = findByAuthenticationService.findUser();
         JobSeeker jobSeeker = jobSeekerRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Job seeker not found"));
         Application application = applicationRepository.findByIdAndJobSeekerId(applicationId, jobSeeker.getId()).orElseThrow(() -> new ResourceNotFoundException("Application not found"));
         ApplicationResponseDto applicationResponseDto = new ApplicationResponseDto();
@@ -101,10 +94,7 @@ public class ApplicationService {
     }
 
     public List<ApplicationResponseDto> getAllApplications(){
-        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+        User user = findByAuthenticationService.findUser();
         JobSeeker jobSeeker = jobSeekerRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Job seeker not found"));
         List<Application> applications = applicationRepository.findByJobSeekerId( jobSeeker.getId());
 

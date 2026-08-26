@@ -4,7 +4,6 @@ import com.faiyaz.SeekersStop.Dto.JobSeekerRequestDto;
 import com.faiyaz.SeekersStop.Dto.JobSeekerResponseDto;
 import com.faiyaz.SeekersStop.Service.JobSeekerService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,11 +26,11 @@ public class JobSeekerController {
 
     @GetMapping("/profile")
     public JobSeekerResponseDto getJobSeekerProfile() {
-        return jobSeekerService.GetMyJobSeekerProfile();
+        return jobSeekerService.getMyJobSeekerProfile();
     }
 
     @PutMapping("/profile")
     public JobSeekerResponseDto updateJobSeekerProfile(@Valid @RequestBody JobSeekerRequestDto request) {
-        return jobSeekerService.UpdateMyJobSeekerProfile(request);
+        return jobSeekerService.updateMyJobSeekerProfile(request);
     }
 }

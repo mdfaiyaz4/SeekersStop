@@ -7,13 +7,8 @@ import com.faiyaz.SeekersStop.Entity.Recruiter;
 import com.faiyaz.SeekersStop.Entity.User;
 import com.faiyaz.SeekersStop.Repository.JobRepository;
 import com.faiyaz.SeekersStop.Repository.RecruiterRepository;
-import com.faiyaz.SeekersStop.Repository.UserRepository;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ForbiddenException;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ResourceNotFoundException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,25 +19,21 @@ public class JobService {
 
     private final JobRepository jobRepository;
     private final RecruiterRepository recruiterRepository;
-    private final UserRepository userRepository;
+    private final FindByAuthenticationService findByAuthenticationService;
 
 
     public JobService(JobRepository jobRepository,
-                      RecruiterRepository recruiterRepository,
-                      UserRepository userRepository) {
+                      FindByAuthenticationService findByAuthenticationService,
+                      RecruiterRepository recruiterRepository
+                      ) {
         this.jobRepository = jobRepository;
+        this.findByAuthenticationService = findByAuthenticationService;
         this.recruiterRepository = recruiterRepository;
-        this.userRepository = userRepository;
+
     }
 
     public JobResponseDto createJob(JobRequestDto jobRequestDto) {
-        Authentication authentication = SecurityContextHolder
-                .getContext().
-                getAuthentication();
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException
-                        ("Username Not Found"));
+        User user = findByAuthenticationService.findUser();
         Recruiter recruiter = recruiterRepository.findByUser(user)
                 .orElseThrow(() -> new ResourceNotFoundException
                         ("Recruiter Profile Not Found"));
@@ -114,11 +105,8 @@ public class JobService {
         return jobResponseDto;
     }
 
-    public JobResponseDto UpdateJobById(Long id, JobRequestDto jobRequestDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
+    public JobResponseDto updateJobById(Long id, JobRequestDto jobRequestDto) {
+        User user = findByAuthenticationService.findUser();
         Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Recruiter Profile Not Found"));
         Job job = jobRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Job Not Found"));
         if (!job.getRecruiter().getId().equals(recruiter.getId())) {
@@ -150,10 +138,7 @@ public class JobService {
     }
 
     public void deactivateJobById(Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
+        User user = findByAuthenticationService.findUser();
         Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Recruiter Profile Not Found"));
         Job job = jobRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Job Not Found"));
         if (!job.getRecruiter().getId().equals(recruiter.getId())) {
@@ -166,10 +151,7 @@ public class JobService {
     }
 
     public void activateJobById(Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
+        User user = findByAuthenticationService.findUser();
         Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Recruiter Profile Not Found"));
         Job job = jobRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Job Not Found"));
         if (!job.getRecruiter().getId().equals(recruiter.getId()) || job.getActive() == true) {

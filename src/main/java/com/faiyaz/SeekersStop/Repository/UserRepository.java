@@ -1,7 +1,7 @@
 package com.faiyaz.SeekersStop.Repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import com.faiyaz.SeekersStop.Entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 

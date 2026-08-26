@@ -1,6 +1,5 @@
 package com.faiyaz.SeekersStop.Configuration;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -44,7 +43,7 @@ public class SpringConfig {
 
                         .requestMatchers(HttpMethod.POST ,"/jobs")
                         .hasRole("RECRUITER")
-                        .requestMatchers(HttpMethod.PUT ,"/jobs")
+                        .requestMatchers(HttpMethod.PUT ,"/jobs/*")
                         .hasRole("RECRUITER")
                         .requestMatchers(HttpMethod.GET ,"/jobs")
                         .authenticated()

@@ -2,8 +2,6 @@ package com.faiyaz.SeekersStop.Controller;
 
 import com.faiyaz.SeekersStop.Dto.JobRequestDto;
 import com.faiyaz.SeekersStop.Dto.JobResponseDto;
-import com.faiyaz.SeekersStop.Entity.Job;
-import com.faiyaz.SeekersStop.Repository.JobRepository;
 import com.faiyaz.SeekersStop.Service.JobService;
 import com.faiyaz.SeekersStop.Service.RecruiterApplicationService;
 import jakarta.validation.Valid;
@@ -11,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -47,7 +44,7 @@ public class JobController {
 
     @PutMapping("/{id}")
     public JobResponseDto updateJob(@PathVariable Long id, @Valid @RequestBody JobRequestDto jobRequestDto) {
-        return jobService.UpdateJobById(id, jobRequestDto);
+        return jobService.updateJobById(id, jobRequestDto);
     }
 
     @DeleteMapping("/deactive/{id}")
