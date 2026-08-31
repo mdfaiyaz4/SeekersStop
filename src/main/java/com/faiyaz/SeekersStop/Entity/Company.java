@@ -18,6 +18,7 @@ public class Company {
     private String website;
     private String contactInfo;
 
+
     @OneToMany(mappedBy = "company")
     private List<Recruiter> recruiters;
 

@@ -29,6 +29,14 @@ public class CompanyService {
 
     public CompanyResponseDto createCompany(CompanyRequestDto companyRequestDto){
 
+        User user = findByAuthenticationService.findUser();
+        Recruiter recruiter = recruiterRepository.findByUser(user)
+                .orElseThrow(()->
+                new ResourceNotFoundException("Recruiter not found"));
+        if(recruiter.getCompany()!=null){
+            throw new DuplicateResourceException("Company already exists");
+        }
+
         Company company = new Company();
         company.setName(companyRequestDto.getName());
         company.setDescription(companyRequestDto.getDescription());
@@ -36,7 +44,10 @@ public class CompanyService {
         company.setWebsite(companyRequestDto.getWebsite());
         company.setContactInfo(companyRequestDto.getContact());
 
+
         Company saved = companyRepository.save(company);
+        recruiter.setCompany(saved);
+        recruiterRepository.save(recruiter);
 
         CompanyResponseDto companyResponseDto = new CompanyResponseDto();
         companyResponseDto.setName(saved.getName());
@@ -52,7 +63,8 @@ public class CompanyService {
     public CompanyResponseDto getMyCompany(){
 
         User user = findByAuthenticationService.findUser();
-        Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
+        Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(() ->
+                new ResourceNotFoundException("Recruiter not found"));
         Company company = recruiter.getCompany();
         if(company == null){
             throw new ResourceNotFoundException("Company not found");
@@ -73,7 +85,8 @@ public class CompanyService {
 
 
         User user = findByAuthenticationService.findUser();
-        Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
+        Recruiter recruiter = recruiterRepository.findByUser(user).orElseThrow(()
+                -> new ResourceNotFoundException("Recruiter not found"));
         Company company = recruiter.getCompany();
         if(company == null){
             throw new ResourceNotFoundException("Company not found");

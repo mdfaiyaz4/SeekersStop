@@ -4,6 +4,7 @@ import com.faiyaz.SeekersStop.Dto.JobRequestDto;
 import com.faiyaz.SeekersStop.Dto.JobResponseDto;
 import com.faiyaz.SeekersStop.Service.JobService;
 import com.faiyaz.SeekersStop.Service.RecruiterApplicationService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/jobs")
+@SecurityRequirement(name = "bearerAuth")
 public class JobController {
 
     JobController(JobService jobService,

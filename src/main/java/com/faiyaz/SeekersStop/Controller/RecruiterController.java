@@ -4,6 +4,7 @@ import com.faiyaz.SeekersStop.Dto.RecruiterProfileUpdateRequestDto;
 import com.faiyaz.SeekersStop.Dto.RecruiterRequestDto;
 import com.faiyaz.SeekersStop.Dto.RecruiterResponseDto;
 import com.faiyaz.SeekersStop.Service.RecruiterService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/recruiter")
+@SecurityRequirement(name = "bearerAuth")
 public class RecruiterController {
     private final RecruiterService recruiterService;
     public RecruiterController(RecruiterService recruiterService) {

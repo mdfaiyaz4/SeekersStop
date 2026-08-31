@@ -3,6 +3,7 @@ package com.faiyaz.SeekersStop.Controller;
 import com.faiyaz.SeekersStop.Dto.CompanyRequestDto;
 import com.faiyaz.SeekersStop.Dto.CompanyResponseDto;
 import com.faiyaz.SeekersStop.Service.CompanyService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/company")
+@SecurityRequirement(name = "bearerAuth")
 public class CompanyController {
 
     public CompanyController(CompanyService companyService) {

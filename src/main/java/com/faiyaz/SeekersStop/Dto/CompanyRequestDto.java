@@ -25,4 +25,5 @@ public class CompanyRequestDto {
 
     @NotBlank(message = "Company website is required")
     private String website;
+
 }
