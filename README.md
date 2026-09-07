@@ -167,6 +167,7 @@ Spring Security and JWT handle authentication, authorization, and access control
 | `POST` | `/jobseeker/profile` | `JOB_SEEKER` |
 | `GET` | `/jobseeker/profile` | `JOB_SEEKER` |
 | `PUT` | `/jobseeker/profile` | `JOB_SEEKER` |
+| `GET` | `/jobseeker/cv` | `JOB_SEEKER` |
 
 ### Recruiter
 
