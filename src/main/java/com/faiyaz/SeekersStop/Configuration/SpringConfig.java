@@ -80,6 +80,8 @@ public class SpringConfig {
                         .hasRole("JOB_SEEKER")
                         .requestMatchers(HttpMethod.GET, "/jobseeker/profile")
                         .hasRole("JOB_SEEKER")
+                        .requestMatchers(HttpMethod.GET, "/jobseeker/cv")
+                        .hasRole("JOB_SEEKER")
                         .anyRequest()
                         .authenticated());
                         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class );

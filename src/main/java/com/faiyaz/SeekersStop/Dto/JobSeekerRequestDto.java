@@ -12,8 +12,6 @@ public class JobSeekerRequestDto {
     private String skill;
     @NotBlank(message = "Name is required")
     private String name;
-    @NotBlank(message = "Cv is required")
-    private String cv;
     @NotBlank(message = "Experience is required")
     private String experience;
     @Pattern(

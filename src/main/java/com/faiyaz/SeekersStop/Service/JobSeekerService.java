@@ -7,30 +7,65 @@ import com.faiyaz.SeekersStop.Entity.User;
 import com.faiyaz.SeekersStop.Repository.JobSeekerRepository;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.DuplicateResourceException;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ResourceNotFoundException;
+
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 @Service
 public class JobSeekerService {
     private final JobSeekerRepository jobSeekerRepository;
-
+    private final FileStorageService  fileStorageService;
     private final FindByAuthenticationService findByAuthentication;
 
     public JobSeekerService(JobSeekerRepository jobSeekerRepository,
-                            FindByAuthenticationService findByAuthentication) {
+                            FindByAuthenticationService findByAuthentication,
+                            FileStorageService fileStorageService) {
         this.jobSeekerRepository = jobSeekerRepository;
         this.findByAuthentication = findByAuthentication;
+        this.fileStorageService = fileStorageService;
 
     }
-    public JobSeekerResponseDto createJobSeekerProfile(JobSeekerRequestDto jobSeekerRequestDto){
+
+    public Resource getMyCv() {
+
+        User user = findByAuthentication.findUser();
+
+        JobSeeker jobSeeker = jobSeekerRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid JobSeeker"));
+
+        Path cvPath = Paths.get(jobSeeker.getCv());
+
+        if (!Files.exists(cvPath)) {
+            throw new ResourceNotFoundException("CV file not found");
+        }
+
+        try {
+            return new UrlResource(cvPath.toUri());
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException("Unable to load CV");
+        }
+    }
+
+
+    public JobSeekerResponseDto createJobSeekerProfile(JobSeekerRequestDto jobSeekerRequestDto, MultipartFile cv){
+
         User user = findByAuthentication.findUser();
         if(jobSeekerRepository.existsByUser(user)){
             throw new DuplicateResourceException("Jobseeker already exists");
         }
-
+        String cvpath = fileStorageService.storeCv(cv);
        JobSeeker jobSeeker = new  JobSeeker();
         jobSeeker.setUser(user);
        jobSeeker.setName(jobSeekerRequestDto.getName());
-       jobSeeker.setCv(jobSeekerRequestDto.getCv());
+       jobSeeker.setCv(cvpath);
        jobSeeker.setExperience(jobSeekerRequestDto.getExperience());
        jobSeeker.setContact(jobSeekerRequestDto.getContact());
        jobSeeker.setSkill(jobSeekerRequestDto.getSkill());
@@ -70,7 +105,7 @@ public class JobSeekerService {
         jobSeeker.setContact(jobSeekerRequestDto.getContact());
         jobSeeker.setSkill(jobSeekerRequestDto.getSkill());
         jobSeeker.setExperience(jobSeekerRequestDto.getExperience());
-        jobSeeker.setCv(jobSeekerRequestDto.getCv());
+       // jobSeeker.setCv(jobSeekerRequestDto.getCv());
         jobSeeker.setName(jobSeekerRequestDto.getName());
         jobSeekerRepository.save(jobSeeker);
 
