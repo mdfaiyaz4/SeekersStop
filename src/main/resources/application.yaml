@@ -3,7 +3,7 @@ spring:
     name: SeekersStop
 
   datasource:
-    url: jdbc:mysql://localhost:3306/job_portal
+    url: jdbc:mysql://mysql:3306/job_portal
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
