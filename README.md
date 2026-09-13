@@ -1,56 +1,71 @@
+Below is the complete `README.md` content, ready to copy and paste directly into your GitHub repository.
+
 # SeekersStop
 
-A role-based job portal backend built with Java and Spring Boot. SeekersStop connects job seekers and recruiters through a secure REST API, providing functionality for user authentication, job management, recruiter and job seeker profiles, company management, and job applications.
+A role-based job portal backend built with **Java 21 and Spring Boot**. SeekersStop connects job seekers and recruiters through a secure REST API, providing functionality for user authentication, job management, recruiter and job seeker profiles, company management, job applications, and CV management.
+
+The backend is containerized using **Docker and Docker Compose**, allowing the Spring Boot application and MySQL database to run together in an isolated environment.
+
+---
 
 ## Overview
 
 SeekersStop is designed around two primary user roles:
 
-- **Job Seeker** — can create and manage a professional profile, browse jobs, apply for jobs, and track applications.
-- **Recruiter** — can manage a recruiter profile and company, create and manage job postings, view applications, and update application statuses.
+* **Job Seeker** — can create and manage a professional profile, browse jobs, apply for jobs, and track applications.
+* **Recruiter** — can manage a recruiter profile and company, create and manage job postings, view applications, and update application statuses.
 
-The application follows a layered architecture using Controllers, Services, Repositories, DTOs, and Entities.
+The application follows a layered architecture using:
+
+* Controllers
+* Services
+* Repositories
+* DTOs
+* Entities
+
+---
 
 ## Features
 
 ### Authentication & Security
 
-- User registration and login
-- JWT-based authentication
-- BCrypt password hashing
-- Role-based authorization
-- Separate permissions for `JOB_SEEKER` and `RECRUITER`
-- JWT request filtering using `OncePerRequestFilter`
-- Protected REST endpoints
-- Centralized handling of authentication and authorization errors
+* User registration and login
+* JWT-based authentication
+* BCrypt password hashing
+* Role-based authorization
+* Separate permissions for `JOB_SEEKER` and `RECRUITER`
+* JWT request filtering using `OncePerRequestFilter`
+* Protected REST endpoints
+* Centralized handling of authentication and authorization errors
 
 ### Job Seeker
 
 Job seekers can:
 
-- Create a job seeker profile
-- View their own profile
-- Update their profile
-- Store skills, experience, CV, and contact information
-- Browse available jobs
-- View individual job details
-- Apply for jobs
-- View their applications
-- View individual application details
+* Create a job seeker profile
+* View their own profile
+* Update their profile
+* Store skills, experience, CV, and contact information
+* Browse available jobs
+* View individual job details
+* Apply for jobs
+* View their applications
+* View individual application details
+* Upload and download CVs in PDF format
 
 ### Recruiter
 
 Recruiters can:
 
-- Create a recruiter profile
-- View their own profile
-- Update their profile
-- Manage their associated company
-- Create job postings
-- Update job postings
-- Activate and deactivate job postings
-- View applications for their jobs
-- Update application statuses
+* Create a recruiter profile
+* View their own profile
+* Update their profile
+* Manage their associated company
+* Create job postings
+* Update job postings
+* Activate and deactivate job postings
+* View applications for their jobs
+* Update application statuses
 
 ### Company Management
 
@@ -58,9 +73,9 @@ Recruiters can manage the company associated with their account.
 
 Company operations include:
 
-- Create company
-- View company information
-- Update company information
+* Create company
+* View company information
+* Update company information
 
 Company access is tied to the authenticated recruiter, preventing arbitrary access to another company's information.
 
@@ -70,13 +85,13 @@ Recruiters can create and manage job postings.
 
 Each job contains:
 
-- Job title
-- Description
-- Required experience
-- Qualification
-- Salary
-- Location
-- Application deadline
+* Job title
+* Description
+* Required experience
+* Qualification
+* Salary
+* Location
+* Application deadline
 
 Jobs can also be activated or deactivated without permanently deleting the job record.
 
@@ -88,25 +103,42 @@ Job seekers can submit applications for available jobs, while recruiters can rev
 
 Application status changes are handled through a dedicated API endpoint.
 
-## Technology Stack
+### CV Management
 
-| Technology | Purpose |
-|---|---|
-| Java 21 | Programming language |
-| Spring Boot | Backend framework |
-| Spring MVC | REST API development |
-| Spring Security | Authentication and authorization |
-| JWT | Stateless authentication |
-| Spring Data JPA | Data access layer |
-| Hibernate | ORM |
-| MySQL | Relational database |
-| Jakarta Validation | Request validation |
-| Lombok | Boilerplate reduction |
-| Maven | Build and dependency management |
-| Postman | API testing |
-| Git & GitHub | Version control |
+Job seekers can upload their CV as a PDF file.
 
-## Architecture
+* PDF file type validation
+* UUID-based file naming
+* CV files stored outside the database
+* CV reference stored in the database
+* Authenticated CV download endpoint
+
+---
+
+# Technology Stack
+
+| Technology             | Purpose                            |
+| ---------------------- | ---------------------------------- |
+| **Java 21**            | Programming language               |
+| **Spring Boot**        | Backend framework                  |
+| **Spring MVC**         | REST API development               |
+| **Spring Security**    | Authentication and authorization   |
+| **JWT**                | Stateless authentication           |
+| **Spring Data JPA**    | Data access layer                  |
+| **Hibernate**          | ORM                                |
+| **MySQL 8**            | Relational database                |
+| **Jakarta Validation** | Request validation                 |
+| **Lombok**             | Boilerplate reduction              |
+| **Maven**              | Build and dependency management    |
+| **Swagger / OpenAPI**  | REST API documentation and testing |
+| **Docker**             | Application containerization       |
+| **Docker Compose**     | Multi-container orchestration      |
+| **Postman**            | API testing                        |
+| **Git & GitHub**       | Version control                    |
+
+---
+
+# Architecture
 
 The project follows a layered architecture:
 
@@ -126,14 +158,32 @@ Repository Layer
 MySQL Database
 ```
 
+### Docker Architecture
+
+When running with Docker Compose:
+
+```text
+                 Docker Compose
+                       |
+          ┌────────────┴────────────┐
+          |                         |
+          v                         v
+   Spring Boot App             MySQL 8
+   seekersstop-app             seekersstop-mysql
+          |                         |
+          └────────────┬────────────┘
+                       |
+                  Docker Network
+```
+
 ### Controller Layer
 
 Responsible for:
 
-- Receiving HTTP requests
-- Mapping API endpoints
-- Validating request DTOs
-- Returning API responses
+* Receiving HTTP requests
+* Mapping API endpoints
+* Validating request DTOs
+* Returning API responses
 
 ### Service Layer
 
@@ -151,89 +201,114 @@ DTOs are used to separate API request/response models from database entities.
 
 Spring Security and JWT handle authentication, authorization, and access control.
 
-## API Endpoints
+---
 
-### Authentication
+# API Documentation
 
-| Method | Endpoint | Access |
-|---|---|---|
+SeekersStop uses **Swagger / OpenAPI** to provide interactive API documentation.
+
+After starting the application, Swagger UI is available at:
+
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
+Swagger allows developers to:
+
+* View available REST endpoints
+* View request and response models
+* Understand authentication requirements
+* Test API endpoints directly from the browser
+
+---
+
+# API Endpoints
+
+## Authentication
+
+| Method | Endpoint         | Access |
+| ------ | ---------------- | ------ |
 | `POST` | `/auth/register` | Public |
-| `POST` | `/auth/login` | Public |
+| `POST` | `/auth/login`    | Public |
 
-### Job Seeker
+## Job Seeker
 
-| Method | Endpoint | Access |
-|---|---|---|
+| Method | Endpoint             | Access       |
+| ------ | -------------------- | ------------ |
 | `POST` | `/jobseeker/profile` | `JOB_SEEKER` |
-| `GET` | `/jobseeker/profile` | `JOB_SEEKER` |
-| `PUT` | `/jobseeker/profile` | `JOB_SEEKER` |
-| `GET` | `/jobseeker/cv` | `JOB_SEEKER` |
+| `GET`  | `/jobseeker/profile` | `JOB_SEEKER` |
+| `PUT`  | `/jobseeker/profile` | `JOB_SEEKER` |
+| `GET`  | `/jobseeker/cv`      | `JOB_SEEKER` |
 
-### Recruiter
+## Recruiter
 
-| Method | Endpoint | Access |
-|---|---|---|
+| Method | Endpoint             | Access      |
+| ------ | -------------------- | ----------- |
 | `POST` | `/recruiter/profile` | `RECRUITER` |
-| `GET` | `/recruiter/profile` | `RECRUITER` |
-| `PUT` | `/recruiter/profile` | `RECRUITER` |
+| `GET`  | `/recruiter/profile` | `RECRUITER` |
+| `PUT`  | `/recruiter/profile` | `RECRUITER` |
 
-### Company
+## Company
 
-| Method | Endpoint | Access |
-|---|---|---|
+| Method | Endpoint   | Access      |
+| ------ | ---------- | ----------- |
 | `POST` | `/company` | `RECRUITER` |
-| `GET` | `/company` | `RECRUITER` |
-| `PUT` | `/company` | `RECRUITER` |
+| `GET`  | `/company` | `RECRUITER` |
+| `PUT`  | `/company` | `RECRUITER` |
 
-### Jobs
+## Jobs
 
-| Method | Endpoint | Access |
-|---|---|---|
-| `POST` | `/jobs` | `RECRUITER` |
-| `GET` | `/jobs` | Authenticated |
-| `GET` | `/jobs/{id}` | Authenticated |
-| `PUT` | `/jobs/{id}` | `RECRUITER` |
-| `DELETE` | `/jobs/deactive/{id}` | `RECRUITER` |
-| `PUT` | `/jobs/active/{id}` | `RECRUITER` |
+| Method   | Endpoint              | Access        |
+| -------- | --------------------- | ------------- |
+| `POST`   | `/jobs`               | `RECRUITER`   |
+| `GET`    | `/jobs`               | Authenticated |
+| `GET`    | `/jobs/{id}`          | Authenticated |
+| `PUT`    | `/jobs/{id}`          | `RECRUITER`   |
+| `DELETE` | `/jobs/deactive/{id}` | `RECRUITER`   |
+| `PUT`    | `/jobs/active/{id}`   | `RECRUITER`   |
 
-### Applications
+## Applications
 
-| Method | Endpoint | Access |
-|---|---|---|
-| `POST` | `/applications` | `JOB_SEEKER` |
-| `GET` | `/applications/my` | `JOB_SEEKER` |
-| `GET` | `/applications/{applicationId}` | `JOB_SEEKER` |
-| `GET` | `/applications/recruiter` | `RECRUITER` |
-| `PATCH` | `/applications/{applicationId}/status` | `RECRUITER` |
+| Method  | Endpoint                               | Access       |
+| ------- | -------------------------------------- | ------------ |
+| `POST`  | `/applications`                        | `JOB_SEEKER` |
+| `GET`   | `/applications/my`                     | `JOB_SEEKER` |
+| `GET`   | `/applications/{applicationId}`        | `JOB_SEEKER` |
+| `GET`   | `/applications/recruiter`              | `RECRUITER`  |
+| `PATCH` | `/applications/{applicationId}/status` | `RECRUITER`  |
 
-## Validation & Error Handling
+---
+
+# Validation & Error Handling
 
 The application uses **Jakarta Bean Validation** to validate incoming request data.
 
 Common validation annotations include:
 
-- `@NotBlank`
-- `@NotNull`
-- `@Positive`
-- `@Pattern`
-- `@Valid`
+* `@NotBlank`
+* `@NotNull`
+* `@Positive`
+* `@Pattern`
+* `@Valid`
 
 A centralized exception handling mechanism is used to provide consistent API error responses.
 
 The application handles common HTTP responses such as:
 
-| Status | Meaning |
-|---|---|
-| `200 OK` | Request completed successfully |
-| `201 CREATED` | Resource successfully created |
-| `204 NO CONTENT` | Operation successful with no response body |
-| `400 BAD REQUEST` | Invalid request or validation failure |
-| `401 UNAUTHORIZED` | Authentication is missing or invalid |
-| `403 FORBIDDEN` | User is authenticated but lacks permission |
-| `404 NOT FOUND` | Requested resource does not exist |
-| `409 CONFLICT` | Resource conflicts or duplicate data |
+| Status             | Meaning                                    |
+| ------------------ | ------------------------------------------ |
+| `200 OK`           | Request completed successfully             |
+| `201 CREATED`      | Resource successfully created              |
+| `204 NO CONTENT`   | Operation successful with no response body |
+| `400 BAD REQUEST`  | Invalid request or validation failure      |
+| `401 UNAUTHORIZED` | Authentication is missing or invalid       |
+| `403 FORBIDDEN`    | User is authenticated but lacks permission |
+| `404 NOT FOUND`    | Requested resource does not exist          |
+| `409 CONFLICT`     | Resource conflicts or duplicate data       |
 
-## Authentication Flow
+---
+
+# Authentication Flow
 
 The application uses **JWT for stateless authentication**.
 
@@ -281,11 +356,13 @@ ROLE_RECRUITER
 
 Spring Security then uses these authorities to determine whether the user can access a particular endpoint.
 
-## Database
+---
 
-SeekersStop uses **MySQL** with **Spring Data JPA** and **Hibernate**.
+# Database
 
-The main database used during development is:
+SeekersStop uses **MySQL 8** with **Spring Data JPA** and **Hibernate**.
+
+The main database is:
 
 ```text
 job_portal
@@ -293,16 +370,26 @@ job_portal
 
 The application uses JPA entities to represent the main domain objects, including:
 
-- `User`
-- `JobSeeker`
-- `Recruiter`
-- `Company`
-- `Job`
-- `Application`
+* `User`
+* `JobSeeker`
+* `Recruiter`
+* `Company`
+* `Job`
+* `Application`
 
 Hibernate manages the persistence and relationships between these entities.
 
-## Environment Configuration
+When running through Docker Compose, MySQL data is stored in a Docker named volume:
+
+```text
+mysql-data
+```
+
+This allows database data to persist when the containers are stopped or recreated.
+
+---
+
+# Environment Configuration
 
 Sensitive configuration values are not stored directly in the repository.
 
@@ -322,42 +409,13 @@ DB_PASSWORD=your_mysql_password
 JWT_SECRET=your_secret_key
 ```
 
-These values should be configured through the local environment or IDE run configuration.
+For Docker Compose, these values can be provided through a local `.env` file.
 
 > **Important:** Never commit database credentials, JWT secrets, API keys, or other sensitive information to GitHub.
 
-The `.env` file is excluded through `.gitignore`.
+The `.env` file should remain local and be excluded through `.gitignore`.
 
-## Getting Started
-
-### Prerequisites
-
-Make sure you have the following installed:
-
-- Java 21
-- MySQL
-- Git
-
-Maven is not required separately because the project includes the **Maven Wrapper**.
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/SeekersStop.git
-cd SeekersStop
-```
-
-### 2. Create the Database
-
-Create the MySQL database:
-
-```sql
-CREATE DATABASE job_portal;
-```
-
-### 3. Configure Environment Variables
-
-Set the following variables in your IDE or local environment:
+A `.env.example` file can be provided in the repository to show the required variables:
 
 ```text
 DB_USERNAME=your_mysql_username
@@ -365,15 +423,118 @@ DB_PASSWORD=your_mysql_password
 JWT_SECRET=your_secret_key
 ```
 
-### 4. Run the Application
+---
 
-On Windows:
+# Running with Docker
+
+Docker is the recommended way to run SeekersStop because it runs the Spring Boot application and MySQL database together.
+
+## Prerequisites
+
+Install:
+
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+* Git
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/SeekersStop.git
+cd SeekersStop
+```
+
+## 2. Configure Environment Variables
+
+Create a `.env` file in the same directory as `docker-compose.yml`:
+
+```text
+DB_USERNAME=seekersstop
+DB_PASSWORD=your_mysql_password
+JWT_SECRET=your_secret_key
+```
+
+Do not commit this file to GitHub.
+
+## 3. Start the Application
+
+```bash
+docker compose up --build
+```
+
+Or run it in the background:
+
+```bash
+docker compose up --build -d
+```
+
+Docker Compose will start:
+
+```text
+seekersstop-app
+seekersstop-mysql
+```
+
+The Spring Boot application will be available at:
+
+```text
+http://localhost:8080
+```
+
+Swagger UI:
+
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
+## 4. Stop the Application
+
+```bash
+docker compose down
+```
+
+The MySQL data remains persisted in the Docker volume.
+
+---
+
+# Running Without Docker
+
+The application can also be run directly using Java and MySQL.
+
+## Prerequisites
+
+* Java 21
+* MySQL
+* Git
+
+Maven is not required separately because the project includes the **Maven Wrapper**.
+
+## 1. Create the Database
+
+Create the MySQL database:
+
+```sql
+CREATE DATABASE job_portal;
+```
+
+## 2. Configure Environment Variables
+
+Set:
+
+```text
+DB_USERNAME=your_mysql_username
+DB_PASSWORD=your_mysql_password
+JWT_SECRET=your_secret_key
+```
+
+## 3. Run the Application
+
+### Windows
 
 ```bash
 mvnw.cmd spring-boot:run
 ```
 
-On Linux/macOS:
+### Linux/macOS
 
 ```bash
 ./mvnw spring-boot:run
@@ -385,9 +546,17 @@ The application will start on:
 http://localhost:8080
 ```
 
-## Testing the API
+Swagger UI:
 
-The REST APIs can be tested using **Postman**.
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
+---
+
+# Testing the API
+
+The REST APIs can be tested using **Swagger UI** or **Postman**.
 
 A typical authentication flow is:
 
@@ -398,7 +567,9 @@ Login
    ↓
 Copy JWT
    ↓
-Send JWT with protected requests
+Authorize protected endpoints
+   ↓
+Send authenticated requests
 ```
 
 For protected endpoints, include the token in the request header:
@@ -407,58 +578,64 @@ For protected endpoints, include the token in the request header:
 Authorization: Bearer <JWT_TOKEN>
 ```
 
-Example:
+Swagger UI can also be used to interactively test protected endpoints after authentication.
 
-```http
-GET /applications/recruiter
+---
 
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
-```
-
-## Development Progress
+# Development Progress
 
 The project is being developed incrementally, with each feature being implemented and tested before being added to version control.
 
 Current backend functionality includes:
 
-- User authentication
-- JWT security
-- Role-based authorization
-- Job seeker profiles
-- Recruiter profiles
-- Company management
-- Job creation and management
-- Job activation and deactivation
-- Job applications
-- Application status management
-- Request validation
-- Global exception handling
-- MySQL persistence
+* User authentication
+* JWT security
+* Role-based authorization
+* Job seeker profiles
+* Recruiter profiles
+* Company management
+* Job creation and management
+* Job activation and deactivation
+* Job applications
+* Application status management
+* Request validation
+* Global exception handling
+* MySQL persistence
+* CV PDF upload and download
+* Swagger / OpenAPI documentation
+* Docker containerization
+* Docker Compose setup
 
-## Future Improvements
+---
+
+# Future Improvements
 
 Planned improvements include:
 
-- Pagination
-- Job search and filtering
-- Sorting
-- Resume file upload
-- Email notifications
-- Recruiter dashboard
-- Job seeker dashboard
-- Swagger / OpenAPI documentation
-- Unit testing
-- Integration testing
-- Dockerization
-- CI/CD pipeline
-- Cloud deployment
+* Pagination
+* Job search and filtering
+* Sorting
+* Email notifications
+* Recruiter dashboard
+* Job seeker dashboard
+* Unit testing
+* Integration testing
+* Redis caching
+* Kafka-based event processing
+* CI/CD pipeline
+* Cloud deployment
+* React frontend
 
-## Author
+---
+
+# Author
 
 **MD Faiyaz**
 
 B.Tech — Computer Science & Technology
 
-## License
+---
+
+# License
 
 This project is currently developed as a personal learning and portfolio project.
