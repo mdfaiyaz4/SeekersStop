@@ -1,5 +1,3 @@
-Below is the complete `README.md` content, ready to copy and paste directly into your GitHub repository.
-
 # SeekersStop
 
 A role-based job portal backend built with **Java 21 and Spring Boot**. SeekersStop connects job seekers and recruiters through a secure REST API, providing functionality for user authentication, job management, recruiter and job seeker profiles, company management, job applications, and CV management.
