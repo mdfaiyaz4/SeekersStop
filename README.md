@@ -81,6 +81,16 @@ Company access is tied to the authenticated recruiter, preventing arbitrary acce
 
 Recruiters can create and manage job postings.
 
+Job discovery supports:
+
+* Pagination using Spring Data `Pageable`
+* Dynamic sorting
+* Filtering by location
+* Keyword search by job title
+* Filtering by experience
+* Combining multiple filters in a single request
+* Dynamic query construction using JPA Specifications
+
 Each job contains:
 
 * Job title
@@ -191,6 +201,8 @@ Contains the application's business logic and coordinates operations between con
 
 Handles database persistence using Spring Data JPA.
 
+The job repository uses `JpaSpecificationExecutor` for dynamic job filtering while retaining `JpaRepository` for standard CRUD operations.
+
 ### DTO Layer
 
 DTOs are used to separate API request/response models from database entities.
@@ -264,6 +276,36 @@ Swagger allows developers to:
 | `PUT`    | `/jobs/{id}`          | `RECRUITER`   |
 | `DELETE` | `/jobs/deactive/{id}` | `RECRUITER`   |
 | `PUT`    | `/jobs/active/{id}`   | `RECRUITER`   |
+
+### Job Search, Filtering, Pagination & Sorting
+
+The `GET /jobs` endpoint supports optional query parameters for job discovery.
+
+Examples:
+
+```text
+GET /jobs
+GET /jobs?location=Delhi
+GET /jobs?title=Java
+GET /jobs?experience=Fresher
+GET /jobs?location=Delhi&title=Java
+GET /jobs?location=Delhi&title=Java&experience=Fresher&page=0&size=5&sort=salary,desc
+```
+
+Supported parameters:
+
+| Parameter | Purpose |
+| --------- | ------- |
+| `location` | Filters jobs by exact location |
+| `title` | Searches job titles using partial matching |
+| `experience` | Filters by exact experience value, such as `Fresher` |
+| `page` | Page number, starting from `0` |
+| `size` | Number of jobs returned per page |
+| `sort` | Sorts results, for example `salary,desc` or `title,asc` |
+
+If no filters are provided, only active jobs are returned.
+
+Pagination and sorting are handled through Spring Data `Pageable`, while filtering is built dynamically using JPA Specifications.
 
 ## Applications
 
@@ -603,6 +645,13 @@ Current backend functionality includes:
 * Swagger / OpenAPI documentation
 * Docker containerization
 * Docker Compose setup
+* Job pagination
+* Dynamic job sorting
+* Job search by title
+* Job filtering by location
+* Job filtering by experience
+* Dynamic job filtering using JPA Specifications
+* Combined job filters with pagination and sorting
 
 ---
 
@@ -610,9 +659,6 @@ Current backend functionality includes:
 
 Planned improvements include:
 
-* Pagination
-* Job search and filtering
-* Sorting
 * Email notifications
 * Recruiter dashboard
 * Job seeker dashboard
