@@ -7,8 +7,12 @@ import com.faiyaz.SeekersStop.Entity.Recruiter;
 import com.faiyaz.SeekersStop.Entity.User;
 import com.faiyaz.SeekersStop.Repository.JobRepository;
 import com.faiyaz.SeekersStop.Repository.RecruiterRepository;
+import com.faiyaz.SeekersStop.Specification.JobSpecification;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ForbiddenException;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,6 +26,7 @@ public class JobService {
     private final FindByAuthenticationService findByAuthenticationService;
 
 
+
     public JobService(JobRepository jobRepository,
                       FindByAuthenticationService findByAuthenticationService,
                       RecruiterRepository recruiterRepository
@@ -29,6 +34,7 @@ public class JobService {
         this.jobRepository = jobRepository;
         this.findByAuthenticationService = findByAuthenticationService;
         this.recruiterRepository = recruiterRepository;
+
 
     }
 
@@ -69,10 +75,25 @@ public class JobService {
 
     }
 
-    public List<JobResponseDto> getAllJobs() {
-        List<Job> jobs = jobRepository.findByActiveTrue();
-        List<JobResponseDto> jobResponseDtos = new ArrayList<>();
-        for (Job job : jobs) {
+    public Page<JobResponseDto> getAllJobs(String title,
+                                           Pageable pageable,
+                                           String location,
+                                           String experience) {
+
+
+        Specification<Job> specification = JobSpecification.isActive();
+        if(location != null && !location.isBlank()) {
+            specification = specification.and(JobSpecification.hasLocation(location));
+        }
+         if(title != null && !title.isBlank()) {
+          specification =  specification.and(JobSpecification.hasTitle(title));
+        }
+         if(experience != null && !experience.isBlank()) {
+             specification = specification.and(JobSpecification.hasExperience(experience));
+         }
+         Page<Job> jobs = jobRepository.findAll(specification,pageable);
+
+        return jobs.map(job -> {
             JobResponseDto jobResponseDto = new JobResponseDto();
             jobResponseDto.setId(job.getId());
             jobResponseDto.setDescription(job.getDescription());
@@ -84,9 +105,9 @@ public class JobService {
             jobResponseDto.setSalary(job.getSalary());
             jobResponseDto.setRecruiterName(job.getRecruiter().getName());
             jobResponseDto.setTitle(job.getTitle());
-            jobResponseDtos.add(jobResponseDto);
-        }
-        return jobResponseDtos;
+            return jobResponseDto;
+        });
+
     }
 
     public JobResponseDto getJobById(Long id) {
