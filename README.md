@@ -2,7 +2,7 @@
 
 A role-based job portal backend built with **Java 21 and Spring Boot**. SeekersStop connects job seekers and recruiters through a secure REST API, providing functionality for user authentication, job management, recruiter and job seeker profiles, company management, job applications, and CV management.
 
-The backend is containerized using **Docker and Docker Compose**, allowing the Spring Boot application and MySQL database to run together in an isolated environment.
+The backend is deployable as a regular Spring Boot JAR. Docker Compose is available as an optional local deployment method.
 
 ---
 
@@ -208,7 +208,7 @@ SeekersStop uses **Swagger / OpenAPI** to provide interactive API documentation.
 After starting the application, Swagger UI is available at:
 
 ```text
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8081/swagger-ui/index.html
 ```
 
 Swagger allows developers to:
@@ -383,7 +383,7 @@ When running through Docker Compose, MySQL data is stored in a Docker named volu
 mysql-data
 ```
 
-This allows database data to persist when the containers are stopped or recreated.
+This allows database data to persist when the containers are stopped or recreated. CV files and submitted application-CV snapshots are stored in the `cv-uploads` and `application-cv-uploads` named volumes, mounted at `/app/uploads/cv` and `/app/uploads/application-cv`.
 
 ---
 
@@ -397,17 +397,25 @@ The application uses environment variables for:
 DB_USERNAME
 DB_PASSWORD
 JWT_SECRET
+FRONTEND_URL (optional; defaults to http://localhost:5173)
+SPRING_DATASOURCE_URL (optional; defaults locally to jdbc:mysql://localhost:3306/job_portal)
 ```
 
-Example:
+For Docker Compose, also set `MYSQL_ROOT_PASSWORD` to a separate MySQL root credential. The application connects with the non-root `DB_USERNAME` and `DB_PASSWORD` account; MySQL grants that initialized account access to `job_portal` only.
+
+Example variable names (replace the placeholders with private values):
 
 ```text
 DB_USERNAME=your_mysql_username
 DB_PASSWORD=your_mysql_password
-JWT_SECRET=your_secret_key
+MYSQL_ROOT_PASSWORD=your_separate_mysql_root_password
+JWT_SECRET=<generated-value>
 ```
 
+Generate a JWT key using `openssl rand -base64 32`. `JwtService` Base64-decodes `JWT_SECRET` and passes the resulting bytes to `Keys.hmacShaKeyFor`; 32 random bytes meet the minimum 256-bit HMAC key requirement. Use a different generated value for each environment and never use the command text or a placeholder as a credential.
+
 For Docker Compose, these values can be provided through a local `.env` file.
+Docker Compose sets the datasource URL to `jdbc:mysql://mysql:3306/job_portal`, using the Compose MySQL service name. Direct local runs default to `jdbc:mysql://localhost:3306/job_portal`. For direct Maven/JAR runs, provide the variables in the process environment; Spring Boot does not load `.env` files by itself.
 
 > **Important:** Never commit database credentials, JWT secrets, API keys, or other sensitive information to GitHub.
 
@@ -418,12 +426,31 @@ A `.env.example` file can be provided in the repository to show the required var
 ```text
 DB_USERNAME=your_mysql_username
 DB_PASSWORD=your_mysql_password
-JWT_SECRET=your_secret_key
+JWT_SECRET=<generated-value>
+FRONTEND_URL=http://localhost:5173
 ```
 
 ---
 
-# Running with Docker
+# Production deployment without Docker
+
+Recommended topology: deploy this backend JAR behind HTTPS, use a managed MySQL database, deploy the frontend `dist/` as static files, and point both applications at each other through their environment configuration. Do not use localhost or an ephemeral app filesystem in production.
+
+Build the frontend from `seekersstop-frontend/` with `npm ci`, `npm run lint`, and `npm run build`. Set `VITE_API_BASE_URL` to the HTTPS API URL in the frontend build environment; Vite embeds it at build time. Deploy `dist/` to a static host. `seekersstop-frontend/.env.example` is a placeholder only.
+
+Build the backend from `SeekersStop/` with `mvn clean package`, then run the generated executable JAR using `java -jar target/SeekersStop-0.0.1-SNAPSHOT.jar`. Supply `DB_URL` (or `SPRING_DATASOURCE_URL`), `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `FRONTEND_URL`, `SERVER_PORT` (or `PORT`), and `CV_STORAGE_ROOT` in the process environment. `JWT_SECRET` must be a Base64 encoding of at least 32 random bytes; generate a different secret per environment. Configure `FRONTEND_URL` as the exact HTTPS frontend origin. Keep database and JWT values in the deployment platform's secret manager.
+
+`CV_STORAGE_ROOT` must point to a persistent mounted disk, with backups and restrictive access. Both current CVs and immutable application-time CV copies live beneath that root. A container or platform filesystem that is discarded on redeploy is not suitable. This filesystem implementation is not object storage; S3-compatible storage remains future work.
+
+Database migration caution: Flyway is enabled, but the repository currently contains only V2, which adds `WITHDRAWN`; it does not define the rest of the schema. Existing databases are baselined at version 1, and Hibernate `ddl-auto: update` currently creates/updates the schema. Disabling it would break fresh installations, while leaving it enabled permits unversioned schema changes. Do not point a new production instance at an empty database or disable Hibernate schema updates until a complete, reviewed baseline migration for the existing schema and a migration path for fresh databases are prepared. Back up databases before any migration. No production database has been created or changed by this project preparation.
+
+Startup applies Flyway migrations automatically. Configure managed MySQL networking/TLS and credentials with the database provider, then smoke-test authentication, seeker/recruiter ownership, CV upload/download, application snapshots, and withdrawal. Spring Boot has no Actuator dependency or health endpoint; use process/platform liveness until a health endpoint is deliberately added.
+
+## Local development
+
+Run MySQL locally with a `job_portal` database, set `DB_USERNAME`, `DB_PASSWORD`, and a generated Base64 `JWT_SECRET`, then start the backend with `mvn spring-boot:run` (default port 8081). `FRONTEND_URL` defaults to `http://localhost:5173`. In `seekersstop-frontend/`, create `.env.local` with `VITE_API_BASE_URL=http://localhost:8081`, then use `npm run dev`. Spring Boot does not load `.env` files; provide backend variables in the shell or IDE run configuration. The root `.env.example` documents backend variables; never place real secrets in tracked files.
+
+# Optional Docker Compose
 
 Docker is the recommended way to run SeekersStop because it runs the Spring Boot application and MySQL database together.
 
@@ -448,12 +475,18 @@ Create a `.env` file in the same directory as `docker-compose.yml`:
 ```text
 DB_USERNAME=seekersstop
 DB_PASSWORD=your_mysql_password
-JWT_SECRET=your_secret_key
+MYSQL_ROOT_PASSWORD=your_separate_mysql_root_password
+JWT_SECRET=<generated-value>
+FRONTEND_URL=http://localhost:5173
 ```
+
+Generate `JWT_SECRET` with `openssl rand -base64 32` and set `MYSQL_ROOT_PASSWORD` to a separate root credential. `DB_USERNAME` must remain a non-root MySQL account; the Compose MySQL image initializes it with access to `job_portal` only. For an existing Compose database, MySQL initialization variables do not change already-created MySQL users or passwords; retain the existing application account configuration and provide the separate root variable without resetting the database.
 
 Do not commit this file to GitHub.
 
 ## 3. Start the Application
+
+The Dockerfile builds the backend JAR from source. The Compose setup publishes host port 8081 to container port 8081, waits for MySQL health, and checks that the backend is listening on container port 8081.
 
 ```bash
 docker compose up --build
@@ -475,13 +508,13 @@ seekersstop-mysql
 The Spring Boot application will be available at:
 
 ```text
-http://localhost:8080
+http://localhost:8081
 ```
 
 Swagger UI:
 
 ```text
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8081/swagger-ui/index.html
 ```
 
 ## 4. Stop the Application
@@ -521,8 +554,10 @@ Set:
 ```text
 DB_USERNAME=your_mysql_username
 DB_PASSWORD=your_mysql_password
-JWT_SECRET=your_secret_key
+JWT_SECRET=<generated-value>
 ```
+
+Generate `JWT_SECRET` with `openssl rand -base64 32`; Spring Boot loads it from the process environment. `MYSQL_ROOT_PASSWORD` is only required when using Docker Compose.
 
 ## 3. Run the Application
 
@@ -541,13 +576,13 @@ mvnw.cmd spring-boot:run
 The application will start on:
 
 ```text
-http://localhost:8080
+http://localhost:8081
 ```
 
 Swagger UI:
 
 ```text
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8081/swagger-ui/index.html
 ```
 
 ---
