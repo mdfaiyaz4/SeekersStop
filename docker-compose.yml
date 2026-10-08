@@ -8,7 +8,7 @@ services:
       MYSQL_DATABASE: job_portal
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD to a separate root credential}
 
     volumes:
       - mysql-data:/var/lib/mysql
@@ -17,7 +17,7 @@ services:
       - seekersstop-network
 
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "seekersstop", "-p${DB_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u \"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" --silent"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -29,16 +29,29 @@ services:
     container_name: seekersstop-app
 
     ports:
-      - "8080:8080"
+      - "8081:8081"
 
     environment:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/job_portal
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+
+    volumes:
+      - cv-uploads:/app/uploads/cv
+      - application-cv-uploads:/app/uploads/application-cv
 
     depends_on:
       mysql:
         condition: service_healthy
+
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8081'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
     networks:
       - seekersstop-network
@@ -46,6 +59,8 @@ services:
 
 volumes:
   mysql-data:
+  cv-uploads:
+  application-cv-uploads:
 
 
 networks:
