@@ -1,9 +1,18 @@
+FROM maven:3.9.16-eclipse-temurin-21 AS build
+
+WORKDIR /build
+
+COPY pom.xml ./pom.xml
+COPY src ./src
+
+RUN mvn -B -DskipTests package
+
 FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
 
-COPY target/*.jar app.jar
+COPY --from=build /build/target/*.jar app.jar
 
-EXPOSE 8080
+EXPOSE 8081
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
