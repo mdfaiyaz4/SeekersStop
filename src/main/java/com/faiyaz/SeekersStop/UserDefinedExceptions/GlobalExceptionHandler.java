@@ -31,6 +31,11 @@ public class GlobalExceptionHandler{
         ExceptionResponseDto exceptionResponseDto = new ExceptionResponseDto(HttpStatus.CONFLICT.value(),e.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponseDto);
     }
+    @ExceptionHandler(InvalidStatusTransitionException.class)
+    public ResponseEntity<ExceptionResponseDto> handleInvalidStatusTransitionException(InvalidStatusTransitionException e){
+        ExceptionResponseDto exceptionResponseDto = new ExceptionResponseDto(HttpStatus.CONFLICT.value(),e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponseDto);
+    }
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ExceptionResponseDto> handleIllegalStateException(IllegalStateException e){
         ExceptionResponseDto exceptionResponseDto = new ExceptionResponseDto(HttpStatus.BAD_REQUEST.value(),e.getMessage());
