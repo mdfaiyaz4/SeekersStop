@@ -3,10 +3,8 @@ package com.faiyaz.SeekersStop.Entity;
 
 import com.faiyaz.SeekersStop.Enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+
 
 @Data
 @Entity
