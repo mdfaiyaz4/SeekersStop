@@ -1,11 +1,10 @@
 package com.faiyaz.SeekersStop.Dto;
 
-import com.faiyaz.SeekersStop.Entity.JobSeeker;
-import com.faiyaz.SeekersStop.Enums.ApplicationStatus;
-import lombok.Data;
-
 import java.time.LocalDateTime;
-import java.util.Date;
+
+import com.faiyaz.SeekersStop.Enums.ApplicationStatus;
+
+import lombok.Data;
 
 @Data
 public class ApplicationResponseDto {

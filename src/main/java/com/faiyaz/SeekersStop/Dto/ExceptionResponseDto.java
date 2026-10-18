@@ -1,9 +1,8 @@
 package com.faiyaz.SeekersStop.Dto;
 
-import lombok.Data;
-
 import java.time.LocalDateTime;
-import java.util.Date;
+
+import lombok.Data;
 
 @Data
 public class ExceptionResponseDto {

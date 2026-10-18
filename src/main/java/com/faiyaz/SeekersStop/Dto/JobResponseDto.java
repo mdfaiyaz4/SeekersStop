@@ -1,9 +1,8 @@
 package com.faiyaz.SeekersStop.Dto;
 
-import com.faiyaz.SeekersStop.Entity.Job;
-import lombok.Data;
-
 import java.time.LocalDate;
+
+import lombok.Data;
 
 @Data
 public class JobResponseDto {
@@ -18,6 +17,7 @@ public class JobResponseDto {
     private LocalDate deadline;
     private String recruiterName;
     private String companyName;
+    private Boolean active;
 
 
 }
