@@ -1,15 +1,15 @@
 package com.faiyaz.SeekersStop.Service;
 
+import org.springframework.stereotype.Service;
+
 import com.faiyaz.SeekersStop.Dto.RecruiterProfileUpdateRequestDto;
 import com.faiyaz.SeekersStop.Dto.RecruiterRequestDto;
 import com.faiyaz.SeekersStop.Dto.RecruiterResponseDto;
 import com.faiyaz.SeekersStop.Entity.Recruiter;
 import com.faiyaz.SeekersStop.Entity.User;
-import com.faiyaz.SeekersStop.Repository.CompanyRepository;
 import com.faiyaz.SeekersStop.Repository.RecruiterRepository;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.DuplicateResourceException;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ResourceNotFoundException;
-import org.springframework.stereotype.Service;
 
 @Service
 public class RecruiterService {

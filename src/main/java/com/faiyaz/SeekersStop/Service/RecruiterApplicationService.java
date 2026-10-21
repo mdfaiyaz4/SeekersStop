@@ -7,6 +7,7 @@ import com.faiyaz.SeekersStop.Entity.User;
 import com.faiyaz.SeekersStop.Repository.ApplicationRepository;
 import com.faiyaz.SeekersStop.Repository.RecruiterRepository;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ResourceNotFoundException;
+import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,8 @@ public class RecruiterApplicationService {
 
     @Autowired
     private RecruiterRepository recruiterRepository;
+    @Autowired
+    private FileStorageService fileStorageService;
 
     public List<ApplicationResponseDto> getAllApplications() {
         User user = findByAuthenticationService.findUser();
@@ -40,5 +43,17 @@ public class RecruiterApplicationService {
             responseDtos.add(applicationResponseDto);
         }
         return responseDtos;
+    }
+
+    public Resource getApplicationResume(Long applicationId) {
+        User user = findByAuthenticationService.findUser();
+        Recruiter recruiter = recruiterRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
+
+        Application application = applicationRepository
+                .findByIdAndJobRecruiterId(applicationId, recruiter.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+
+        return fileStorageService.loadApplicationCv(application.getSubmittedCvPath());
     }
 }

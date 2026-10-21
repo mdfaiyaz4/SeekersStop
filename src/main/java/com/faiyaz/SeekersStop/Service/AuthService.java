@@ -1,5 +1,11 @@
 package com.faiyaz.SeekersStop.Service;
 
+import java.util.Optional;
+
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.faiyaz.SeekersStop.Dto.LoginRequestDto;
 import com.faiyaz.SeekersStop.Dto.LoginResponseDto;
 import com.faiyaz.SeekersStop.Dto.RegisterRequestDto;
@@ -7,12 +13,6 @@ import com.faiyaz.SeekersStop.Dto.RegisterResponseDto;
 import com.faiyaz.SeekersStop.Entity.User;
 import com.faiyaz.SeekersStop.Repository.UserRepository;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.UsernameAlreadyExistsException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class AuthService {

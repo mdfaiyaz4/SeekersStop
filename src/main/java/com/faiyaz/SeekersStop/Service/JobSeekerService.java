@@ -54,6 +54,39 @@ public class JobSeekerService {
         }
     }
 
+    public JobSeekerResponseDto updateMyCv(MultipartFile cv) {
+
+        User user = findByAuthentication.findUser();
+
+        JobSeeker jobSeeker = jobSeekerRepository
+                .findByUser(user)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Invalid JobSeeker"));
+
+        String oldCvPath = jobSeeker.getCv();
+
+        String newCvPath = fileStorageService.storeCv(cv);
+
+        jobSeeker.setCv(newCvPath);
+
+        JobSeeker saved = jobSeekerRepository.save(jobSeeker);
+
+        if (oldCvPath != null && !oldCvPath.isBlank()) {
+            fileStorageService.deleteCv(oldCvPath);
+        }
+
+        JobSeekerResponseDto response = new JobSeekerResponseDto();
+
+        response.setJobSeekerId(saved.getId());
+        response.setName(saved.getName());
+        response.setCv(saved.getCv());
+        response.setExperience(saved.getExperience());
+        response.setContact(saved.getContact());
+        response.setSkill(saved.getSkill());
+
+        return response;
+    }
+
 
     public JobSeekerResponseDto createJobSeekerProfile(JobSeekerRequestDto jobSeekerRequestDto, MultipartFile cv){
 
@@ -62,13 +95,13 @@ public class JobSeekerService {
             throw new DuplicateResourceException("Jobseeker already exists");
         }
         String cvpath = fileStorageService.storeCv(cv);
-       JobSeeker jobSeeker = new  JobSeeker();
+        JobSeeker jobSeeker = new  JobSeeker();
         jobSeeker.setUser(user);
-       jobSeeker.setName(jobSeekerRequestDto.getName());
-       jobSeeker.setCv(cvpath);
-       jobSeeker.setExperience(jobSeekerRequestDto.getExperience());
-       jobSeeker.setContact(jobSeekerRequestDto.getContact());
-       jobSeeker.setSkill(jobSeekerRequestDto.getSkill());
+        jobSeeker.setName(jobSeekerRequestDto.getName());
+        jobSeeker.setCv(cvpath);
+        jobSeeker.setExperience(jobSeekerRequestDto.getExperience());
+        jobSeeker.setContact(jobSeekerRequestDto.getContact());
+        jobSeeker.setSkill(jobSeekerRequestDto.getSkill());
 
 
         JobSeeker saved = jobSeekerRepository.save(jobSeeker);
@@ -105,7 +138,7 @@ public class JobSeekerService {
         jobSeeker.setContact(jobSeekerRequestDto.getContact());
         jobSeeker.setSkill(jobSeekerRequestDto.getSkill());
         jobSeeker.setExperience(jobSeekerRequestDto.getExperience());
-       // jobSeeker.setCv(jobSeekerRequestDto.getCv());
+        // jobSeeker.setCv(jobSeekerRequestDto.getCv());
         jobSeeker.setName(jobSeekerRequestDto.getName());
         jobSeekerRepository.save(jobSeeker);
 

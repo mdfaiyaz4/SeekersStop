@@ -1,7 +1,13 @@
 package com.faiyaz.SeekersStop.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
 import com.faiyaz.SeekersStop.Dto.JobRequestDto;
 import com.faiyaz.SeekersStop.Dto.JobResponseDto;
+import com.faiyaz.SeekersStop.Entity.Company;
 import com.faiyaz.SeekersStop.Entity.Job;
 import com.faiyaz.SeekersStop.Entity.Recruiter;
 import com.faiyaz.SeekersStop.Entity.User;
@@ -9,14 +15,8 @@ import com.faiyaz.SeekersStop.Repository.JobRepository;
 import com.faiyaz.SeekersStop.Repository.RecruiterRepository;
 import com.faiyaz.SeekersStop.Specification.JobSpecification;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ForbiddenException;
+import com.faiyaz.SeekersStop.UserDefinedExceptions.IllegalStateException;
 import com.faiyaz.SeekersStop.UserDefinedExceptions.ResourceNotFoundException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class JobService {
@@ -30,7 +30,7 @@ public class JobService {
     public JobService(JobRepository jobRepository,
                       FindByAuthenticationService findByAuthenticationService,
                       RecruiterRepository recruiterRepository
-                      ) {
+    ) {
         this.jobRepository = jobRepository;
         this.findByAuthenticationService = findByAuthenticationService;
         this.recruiterRepository = recruiterRepository;
@@ -43,10 +43,14 @@ public class JobService {
         Recruiter recruiter = recruiterRepository.findByUser(user)
                 .orElseThrow(() -> new ResourceNotFoundException
                         ("Recruiter Profile Not Found"));
+        Company company = recruiter.getCompany();
+        if (company == null) {
+            throw new IllegalStateException("Company profile is required before creating a job");
+        }
 
         Job job = new Job();
         job.setRecruiter(recruiter);
-        job.setCompany(recruiter.getCompany());
+        job.setCompany(company);
         job.setSalary(jobRequestDto.getSalary());
         job.setLocation(jobRequestDto.getLocation());
         job.setDeadline(jobRequestDto.getDeadline());
@@ -68,8 +72,9 @@ public class JobService {
         jobResponseDto.setLocation(savedJob.getLocation());
         jobResponseDto.setId(savedJob.getId());
         jobResponseDto.setDeadline(savedJob.getDeadline());
-        jobResponseDto.setCompanyName(savedJob.getCompany().getName());
+        jobResponseDto.setCompanyName(company.getName());
         jobResponseDto.setRecruiterName(savedJob.getRecruiter().getName());
+        jobResponseDto.setActive(savedJob.getActive());
 
         return jobResponseDto;
 
@@ -85,13 +90,13 @@ public class JobService {
         if(location != null && !location.isBlank()) {
             specification = specification.and(JobSpecification.hasLocation(location));
         }
-         if(title != null && !title.isBlank()) {
-          specification =  specification.and(JobSpecification.hasTitle(title));
+        if(title != null && !title.isBlank()) {
+            specification =  specification.and(JobSpecification.hasTitle(title));
         }
-         if(experience != null && !experience.isBlank()) {
-             specification = specification.and(JobSpecification.hasExperience(experience));
-         }
-         Page<Job> jobs = jobRepository.findAll(specification,pageable);
+        if(experience != null && !experience.isBlank()) {
+            specification = specification.and(JobSpecification.hasExperience(experience));
+        }
+        Page<Job> jobs = jobRepository.findAll(specification,pageable);
 
         return jobs.map(job -> {
             JobResponseDto jobResponseDto = new JobResponseDto();
@@ -105,6 +110,7 @@ public class JobService {
             jobResponseDto.setSalary(job.getSalary());
             jobResponseDto.setRecruiterName(job.getRecruiter().getName());
             jobResponseDto.setTitle(job.getTitle());
+            jobResponseDto.setActive(job.getActive());
             return jobResponseDto;
         });
 
@@ -123,6 +129,7 @@ public class JobService {
         jobResponseDto.setSalary(job.getSalary());
         jobResponseDto.setRecruiterName(job.getRecruiter().getName());
         jobResponseDto.setTitle(job.getTitle());
+        jobResponseDto.setActive(job.getActive());
         return jobResponseDto;
     }
 
@@ -155,6 +162,7 @@ public class JobService {
         jobResponseDto.setRecruiterName(saved.getRecruiter().getName());
         jobResponseDto.setTitle(saved.getTitle());
         jobResponseDto.setCompanyName(saved.getCompany().getName());
+        jobResponseDto.setActive(saved.getActive());
         return jobResponseDto;
     }
 
@@ -181,5 +189,29 @@ public class JobService {
         }
         job.setActive(true);
         jobRepository.save(job);
+    }
+
+    public Page<JobResponseDto> getMyJobs(Pageable pageable) {
+        User user = findByAuthenticationService.findUser();
+        Recruiter recruiter = recruiterRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Recruiter Profile Not Found"));
+        Page<Job> jobs = jobRepository.findByRecruiterId(recruiter.getId(), pageable);
+        return jobs.map(job -> {
+            JobResponseDto jobResponseDto = new JobResponseDto();
+            jobResponseDto.setId(job.getId());
+            jobResponseDto.setRecruiterName(job.getRecruiter().getName());
+            jobResponseDto.setTitle(job.getTitle());
+            jobResponseDto.setSalary(job.getSalary());
+            jobResponseDto.setLocation(job.getLocation());
+            jobResponseDto.setExperience(job.getExperience());
+            jobResponseDto.setDescription(job.getDescription());
+            jobResponseDto.setQualification(job.getQualification());
+            jobResponseDto.setDeadline(job.getDeadline());
+            jobResponseDto.setCompanyName(job.getCompany().getName());
+            jobResponseDto.setActive(job.getActive());
+            return jobResponseDto;
+
+        });
+
     }
 }

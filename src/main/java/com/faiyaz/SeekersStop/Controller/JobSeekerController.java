@@ -25,7 +25,7 @@ public class JobSeekerController {
 
     @PostMapping(value = "/profile",consumes = "multipart/form-data")
     public ResponseEntity<JobSeekerResponseDto> createJobSeekerProfile( @RequestPart("cv") MultipartFile cv,
-                                                                       @Valid @RequestPart("profile") JobSeekerRequestDto jobSeekerRequestDto) {
+                                                                        @Valid @RequestPart("profile") JobSeekerRequestDto jobSeekerRequestDto) {
 
 
         JobSeekerResponseDto jobSeekerProfile = jobSeekerService.createJobSeekerProfile(jobSeekerRequestDto,cv);
@@ -38,6 +38,20 @@ public class JobSeekerController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(cv);
+    }
+
+    @PutMapping(
+            value = "/cv",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<JobSeekerResponseDto> updateMyCv(
+            @RequestPart("cv") MultipartFile cv
+    ) {
+
+        JobSeekerResponseDto updatedCv =
+                jobSeekerService.updateMyCv(cv);
+
+        return ResponseEntity.ok(updatedCv);
     }
 
     @GetMapping("/profile")

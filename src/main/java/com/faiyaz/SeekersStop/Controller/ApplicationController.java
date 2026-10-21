@@ -11,7 +11,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,11 +44,27 @@ public class ApplicationController {
         return recruiterApplicationService.getAllApplications();
     }
 
+    @Operation(summary = "get resume for an application owned by the authenticated recruiter")
+    @GetMapping("/{applicationId}/resume")
+    public ResponseEntity<Resource> getApplicationResume(@PathVariable Long applicationId) {
+        Resource resume = recruiterApplicationService.getApplicationResume(applicationId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"resume.pdf\"")
+                .body(resume);
+    }
+
     @Operation(summary = "update application status")
     @PatchMapping("/{applicationId}/status")
     public ApplicationStatusResponseDto changeStatus ( @PathVariable Long applicationId, @Valid
                                                           @RequestBody ApplicationStatusRequestDto statusRequestDto){
         return applicationService.changeApplicationStatus(statusRequestDto,applicationId);
+    }
+
+    @Operation(summary = "withdraw a pending application owned by the authenticated job seeker")
+    @PatchMapping("/{applicationId}/withdraw")
+    public ApplicationResponseDto withdrawApplication(@PathVariable Long applicationId) {
+        return applicationService.withdrawApplication(applicationId);
     }
 
     @Operation(summary = "get application by id")
